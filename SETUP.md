@@ -3,11 +3,13 @@
 ## 1. Supabase 프로젝트 생성 및 연결
 
 1. <https://supabase.com/dashboard> → **New project** (리전: `ap-northeast-2` Seoul 권장, DB 비밀번호 기록).
-2. **Project Settings → Database → Connection string**에서 두 가지 주소를 복사한다.
+2. 대시보드 상단 **Connect** 버튼에서 공유 풀러(IPv4) 주소 두 가지를 복사한다.
    - **Transaction pooler (포트 6543)** → `DATABASE_URL`
-   - **Direct connection / Session (포트 5432)** → `DIRECT_URL`
+   - **Session pooler (포트 5432)** → `DIRECT_URL` (마이그레이션용.
+     "Direct connection" 주소는 IPv6 전용이라 일반 IPv4 환경·Vercel에서는 세션 풀러를 쓴다.)
 3. 프로젝트 루트에 `.env`를 만들고 `.env.example`을 참고해 채운다.
-   - `DATABASE_URL`에는 반드시 `?pgbouncer=true&connection_limit=1`을 붙인다 (서버리스 + PgBouncer 환경에서 prepared statement 오류 방지).
+   - `DATABASE_URL`에는 반드시 `?pgbouncer=true&connection_limit=1`을 붙인다 (서버리스 + PgBouncer 환경에서 prepared statement 오류 방지). Supabase UI가 주는 기본 문자열에는 `connection_limit=1`이 없으므로 직접 추가한다.
+   - DB 비밀번호에 `@ : / ? #` 등 특수문자가 있으면 percent-encoding 한다 (예: `@` → `%40`).
 4. 스키마 적용 (이미 생성된 마이그레이션 SQL을 그대로 배포):
 
    ```bash
