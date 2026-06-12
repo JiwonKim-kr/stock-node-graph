@@ -1,0 +1,30 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Stock {
+  ticker    String   @id // 6자리 한국 주식 코드 (예: "005930" 삼성전자, "035720" 카카오)
+  name      String   // 종목명
+  sector    String   // 테마 및 업종 섹터명 (예: 반도체, IT서비스, 자동차)
+  market    String   // 소속 시장 구분 (KOSPI 또는 KOSDAQ)
+  createdAt DateTime @default(now())
+  histories StockPriceHistory[]
+}
+
+model StockPriceHistory {
+  id            String   @id @default(uuid())
+  ticker        String
+  price         Float    // 현재가 (KRW 단위)
+  changePercent Float    // 전일 대비 등락률 (%)
+  volume        BigInt   // 거래량 (64비트 정수 처리형)
+  timestamp     DateTime @default(now())
+  stock         Stock    @relation(fields: [ticker], references: [ticker], onDelete: Cascade)
+
+  @@index([ticker, timestamp(sort: Desc)])
+}
